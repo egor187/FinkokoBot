@@ -31,9 +31,10 @@ async def view_all_categories(message: types.Message):
     await message.answer(answer)
 
 
-@dispatcher.message_handler()
-async def view_all_payments(message: types.Message):
-    pass
+@dispatcher.message_handler(commands=["payments"])
+async def view_month_payments(message: types.Message):
+    result = db.get_month_payments()
+    await message.answer(result)
 
 
 if __name__ == "__main__":
