@@ -1,14 +1,33 @@
+import datetime
 import sqlite3
 from aiogram.types import Message
 import re
 import os
+from typing import Union
+import pytz
 
 
 con = sqlite3.connect(os.path.join("db", "finance.db"))
 cur = con.cursor()
 
 
+def _get_now_datetime() -> datetime.datetime:
+    """Return now datetime object"""
+    tz = pytz.timezone("Europe/Moscow")
+    now = datetime.datetime.now(tz)
+    return now
+
+
+def get_now_datetime_formatted() -> str:
+    """Return now datetime formatted object"""
+    now = _get_now_datetime()
+    fmt = "%Y-%m-%d %H:%M:%S"
+    now_formatted = now.strftime(fmt)
+    return now_formatted
+
+
 def parse_message(income_message: Message):
+    """Parse message for add payment"""
     parsed_message = re.match(r"([\d ]+) (.*)", income_message.text)
     if not parsed_message:
         raise Exception("don't understand you")
@@ -19,25 +38,65 @@ def parse_message(income_message: Message):
     return amount, category
 
 
-def get_all_categories() -> str:
-    cur.execute("SELECT name, is_base FROM Category;")
+def _get_all_categories() -> list[tuple[str, str], ...]:
+    """Get all categories from db"""
+    cur.execute("SELECT id, name FROM Category")
     result = cur.fetchall()
+    return result
+
+
+def get_all_categories() -> str:
+    """Get all categories from db in formatted output"""
+    categories = _get_all_categories()
     no_query_answer = "You haven't registered any categories yet"
-    if result:
+    if categories:
         answer = ""
-        for category in result:
-            answer += category[0] + "\n"
+        for category in categories:
+            answer += category[1] + "\n"
         return answer
     return no_query_answer
 
 
-def get_category(income_message: Message):
-    cur.execute("SELECT name FROM Category WHERE name = ?", (income_message.text,))
-    result = cur.fetchone()[0]
-    no_query_answer = "You haven't registered any categories yet"
+def _get_payments_for_categories_per_month() -> list[tuple[str, str], ...]:
+    """Retrieve summary payments for linked to existing category for month"""
+    now = _get_now_datetime()
+    month_ago = now - datetime.timedelta(days=30)
+    cur.execute(f"SELECT Sum(Payment.amount), Category.name"
+                f" from Payment LEFT JOIN Category ON Payment.category = Category.id"
+                f" GROUP BY Category.name WHERE paid_at > '{month_ago}'"
+                )
+    # TODO continue here. Test this query!!
+    result = cur.fetchall()
+    return result
+
+
+def get_payments_for_categories_per_month():
+    categories_per_month = _get_payments_for_categories_per_month()
+    # TODO further continue here.
+
+
+def _get_month_payments() -> Union[dict, None]:
+    categories = _get_all_categories()
+    result = dict()
+    for category in categories:
+        # TODO refactor to .executemany with iterable categories
+        cur.execute("SELECT amount, paid_at FROM Payment WHERE category = ?", (category[0],))
+        result[category[1]] = cur.fetchall()
     if result:
-        return str(result)
-    return no_query_answer
+        return result
+    return
+
+
+def get_month_payments() -> str:
+    payments = _get_month_payments().items()
+    if payments:
+        answer = ""
+        for category, payments_tuple in payments:
+            answer += f"For {category} payments is: "
+            for payment in payments_tuple:
+                answer += f"{payment[0]} at: {payment[1]} \n"
+        return answer
+    return "No data"
 
 
 def add_payment():
