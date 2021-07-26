@@ -8,6 +8,7 @@ authors = ["egor187 <py.egor.py@gmail.com>"]
 python = "^3.9"
 aiogram = "^2.14.3"
 python-dotenv = "^0.19.0"
+pytz = "^2021.1"
 
 [tool.poetry.dev-dependencies]
 
