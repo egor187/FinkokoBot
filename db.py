@@ -57,22 +57,29 @@ def get_all_categories() -> str:
     return no_query_answer
 
 
-def _get_payments_for_categories_per_month() -> list[tuple[str, str], ...]:
-    """Retrieve summary payments for linked to existing category for month"""
+def _get_month_payments_summary_for_categories() -> list[tuple[str, str, str], ...]:
+    """Retrieve summary payments and count of transaction for categories for about month"""
     now = _get_now_datetime()
     month_ago = now - datetime.timedelta(days=30)
-    cur.execute(f"SELECT Sum(Payment.amount), Category.name"
+    cur.execute(f"SELECT Category.name, Sum(Payment.amount), Count(Payment.id)" 
                 f" from Payment LEFT JOIN Category ON Payment.category = Category.id"
-                f" GROUP BY Category.name WHERE paid_at > '{month_ago}'"
+                f" WHERE paid_at > '{month_ago}' GROUP BY Category.name "
                 )
-    # TODO continue here. Test this query!!
     result = cur.fetchall()
     return result
 
 
-def get_payments_for_categories_per_month():
-    categories_per_month = _get_payments_for_categories_per_month()
-    # TODO further continue here.
+def get_payments_summary_for_categories_per_month() -> str:
+    """Formatted summary payments about month"""
+    payments_per_month = _get_month_payments_summary_for_categories()  # tuple (category name, total amount, n-trans)
+    answer = ""
+    if payments_per_month:
+        for payment_group in payments_per_month:
+            answer += f"For category {payment_group[0]} " \
+                      f"month summary is: '{payment_group[1]}'" \
+                      f" payments count: {payment_group[2]}\n"
+        return answer
+    return "No data"
 
 
 def _get_month_payments() -> Union[dict, None]:
