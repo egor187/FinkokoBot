@@ -1,6 +1,10 @@
 # My notes
 notes.my
 
+# Sqlite databases
+db/
+*.db
+
 # Certificates
 *.pem
 
