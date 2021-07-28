@@ -12,18 +12,19 @@ create table Budget(
 
 create table Payment(
     id integer PRIMARY KEY,
-    category REFERENCES Category (id) ON DELETE RESTRICT,
+    category integer,
     amount integer,
-    paid_at datetime
+    paid_at datetime,
+    FOREIGN KEY(category) REFERENCES Category(id) ON DELETE RESTRICT
 );
 
 insert into Category (name, is_base) values
-    ('Products', true),
-    ('Cafe', true),
-    ('Communal', true),
-    ('Entertainment', false),
-    ('Transport', false),
-    ('Gasoline', false),
-    ('Communication', false),
-    ('Vacation', false),
-    ('Other', false);
+    ('products', true),
+    ('cafe', true),
+    ('communal', true),
+    ('entertainment', false),
+    ('transport', false),
+    ('gasoline', false),
+    ('communication', false),
+    ('vacation', false),
+    ('other', false);
