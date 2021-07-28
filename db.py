@@ -8,6 +8,8 @@ import pytz
 import exceptions
 import logging
 
+import aliases
+
 logging.basicConfig(level=logging.INFO)
 
 con = sqlite3.connect(os.path.join("db", "finance.db"))
@@ -30,13 +32,19 @@ def get_now_datetime_formatted() -> str:
     return now_formatted
 
 
+def _get_category_name_by_alias(category_alias: str) -> str:
+    category_name = aliases.aliases.get(category_alias)
+    return category_name
+
+
+
 def parse_payment_message(income_message: Message) -> tuple[int, str]:
     """Parse message for add payment"""
     parsed_message = re.match(r"([\d ]+) (.*)", income_message.text)
     if parsed_message:
         try:
             amount = int(parsed_message.group(1))
-            category = str(parsed_message.group(2).lower())
+            category = str(_get_category_name_by_alias(parsed_message.group(2).lower()))  # return category name by key=alias
             return amount, category
         except ValueError as e:
             logging.info(e)
@@ -44,9 +52,6 @@ def parse_payment_message(income_message: Message) -> tuple[int, str]:
     else:
         logging.error("Incorrect message. Need in fmt '{amount} {category}'")
         raise exceptions.IncorrectMessageException
-
-
-
 
 
 def _get_all_categories() -> list[tuple[str, str], ...]:
@@ -106,7 +111,6 @@ def _get_month_payments() -> Union[dict, None]:
     categories = _get_all_categories()
     result = dict()
     for category in categories:
-        # TODO refactor to .executemany with iterable categories
         cur.execute("SELECT amount, paid_at FROM Payment WHERE category = ?", (category[0],))
         result[category[1]] = cur.fetchall()
     if result:
