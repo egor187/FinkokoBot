@@ -5,9 +5,13 @@ import re
 import os
 from typing import Union
 import pytz
+import exceptions
+import logging
 
+logging.basicConfig(level=logging.INFO)
 
 con = sqlite3.connect(os.path.join("db", "finance.db"))
+con.execute("PRAGMA foreign_keys = 1")  # enable FK support for sqlite engine. Need each time when you connecting to db
 cur = con.cursor()
 
 
@@ -26,16 +30,23 @@ def get_now_datetime_formatted() -> str:
     return now_formatted
 
 
-def parse_message(income_message: Message):
+def parse_payment_message(income_message: Message) -> tuple[int, str]:
     """Parse message for add payment"""
     parsed_message = re.match(r"([\d ]+) (.*)", income_message.text)
-    if not parsed_message:
-        raise Exception("don't understand you")
+    if parsed_message:
+        try:
+            amount = int(parsed_message.group(1))
+            category = str(parsed_message.group(2).lower())
+            return amount, category
+        except ValueError as e:
+            logging.info(e)
+            raise exceptions.IncorrectAmountFormatMessage
+    else:
+        logging.error("Incorrect message. Need in fmt '{amount} {category}'")
+        raise exceptions.IncorrectMessageException
 
-    amount = parsed_message.group(1)
-    category = parsed_message.group(2)
 
-    return amount, category
+
 
 
 def _get_all_categories() -> list[tuple[str, str], ...]:
@@ -57,6 +68,15 @@ def get_all_categories() -> str:
     return no_query_answer
 
 
+def _get_category_id_by_name(category_name: str) -> int:
+    """Return category id by name"""
+    cur.execute(
+        f"SELECT id FROM Category WHERE name='{category_name}'"
+    )
+    category_id = cur.fetchone()
+    return int(category_id[0])
+
+
 def _get_month_payments_summary_for_categories() -> list[tuple[str, str, str], ...]:
     """Retrieve summary payments and count of transaction for categories for about month"""
     now = _get_now_datetime()
@@ -72,12 +92,12 @@ def _get_month_payments_summary_for_categories() -> list[tuple[str, str, str], .
 def get_payments_summary_for_categories_per_month() -> str:
     """Formatted summary payments about month"""
     payments_per_month = _get_month_payments_summary_for_categories()  # tuple (category name, total amount, n-trans)
-    answer = ""
+    answer = "Month payments:\n\n"
     if payments_per_month:
         for payment_group in payments_per_month:
-            answer += f"For category {payment_group[0]} " \
-                      f"month summary is: '{payment_group[1]}'" \
-                      f" payments count: {payment_group[2]}\n"
+            answer += f"'{payment_group[0]}': " \
+                      f"total '{payment_group[1]}'\n" \
+                      f"transaction count '{payment_group[2]}'\n"
         return answer
     return "No data"
 
@@ -106,8 +126,25 @@ def get_month_payments() -> str:
     return "No data"
 
 
-def add_payment():
-    pass
+def add_payment_process(income_message: Message) -> None:
+    """Add payment to db"""
+    now = _get_now_datetime()
+    try:
+        amount, category_name = parse_payment_message(income_message)
+    except (exceptions.IncorrectAmountFormatMessage, exceptions.IncorrectMessageException):
+        raise
+
+    all_categories = get_all_categories()
+
+    if category_name not in all_categories:
+        category_name = "other"
+
+    category_id = _get_category_id_by_name(category_name)
+
+    cur.execute(
+        f"INSERT INTO Payment(category, amount, paid_at) VALUES ('{category_id}', '{amount}', '{now}')"
+    )
+    con.commit()
 
 
 def del_last_payment():
