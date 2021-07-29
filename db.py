@@ -3,7 +3,7 @@ import sqlite3
 from aiogram.types import Message
 import re
 import os
-from typing import Union
+from typing import Union, Optional
 import pytz
 import exceptions
 import logging
@@ -33,12 +33,15 @@ def get_now_datetime_formatted() -> str:
 
 
 def _get_category_name_by_alias(category_alias: str) -> str:
-    category_name = aliases.aliases.get(category_alias)
+    """Return category name for passed category alias"""
+    if category_alias not in aliases.aliases.values():
+        category_name = aliases.aliases.get(category_alias)
+    else:
+        category_name = category_alias
     return category_name
 
 
-
-def parse_payment_message(income_message: Message) -> tuple[int, str]:
+def parse_payment_message(income_message: Message) -> Optional[tuple[int, str]]:
     """Parse message for add payment"""
     parsed_message = re.match(r"([\d ]+) (.*)", income_message.text)
     if parsed_message:
@@ -130,7 +133,7 @@ def get_month_payments() -> str:
     return "No data"
 
 
-def add_payment_process(income_message: Message) -> None:
+def add_payment(income_message: Message) -> None:
     """Add payment to db"""
     now = _get_now_datetime()
     try:
@@ -139,6 +142,9 @@ def add_payment_process(income_message: Message) -> None:
         raise
 
     all_categories = get_all_categories()
+    print(f"!!!!!!!{all_categories}")
+    print(f"!!!!!!!{category_name}")
+    print(f"!!!!!!!{category_name in all_categories}")
 
     if category_name not in all_categories:
         category_name = "other"
