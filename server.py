@@ -40,12 +40,11 @@ async def view_month_payments(message: types.Message):
 
 
 @dispatcher.message_handler()
-async def add_payment(message: types.Message):
+async def add_payment_view(message: types.Message):
     """Entrypoint to 'add_payment' process"""
     try:
-        db.add_payment_process(message)
-    except (exceptions.IncorrectAmountFormatMessage, exceptions.IncorrectMessageException) as e:
-        logging.info(e)
+        db.add_payment(message)
+    except (exceptions.IncorrectAmountFormatMessage, exceptions.IncorrectMessageException):
         await message.answer("Incorrect message. Need in fmt '{amount} {category}'")
     else:
         await message.answer("Payment added")
