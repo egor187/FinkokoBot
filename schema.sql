@@ -25,6 +25,7 @@ insert into Category (name, is_base) values
     ('entertainment', false),
     ('transport', false),
     ('gasoline', false),
+    ('car', false),
     ('communication', false),
     ('vacation', false),
     ('other', false);
