@@ -13,7 +13,6 @@ dotenv.load_dotenv(dotenv.find_dotenv())
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
-logging.basicConfig(level=logging.INFO)
 
 bot = Bot(token=TELEGRAM_BOT_TOKEN)
 dispatcher = Dispatcher(bot)
