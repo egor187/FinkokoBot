@@ -197,13 +197,15 @@ def _init_db():
     """Initializing db"""
     with open("schema.sql", "r") as file:
         sql_schema = file.read()
-        cur.executescript(sql_schema)
+        with con.cursor() as cur:
+            cur.executescript(sql_schema)
 
 
 def _check_db():
     """Check is db plugged in. If not init db and connect"""
-    cur.execute("SELECT * FROM sqlite_master")
-    result = cur.fetchall()
+    with con.cursor() as cur:
+        cur.execute("SELECT * FROM sqlite_master")
+        result = cur.fetchall()
     if result:
         return
     else:
