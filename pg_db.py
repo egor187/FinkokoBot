@@ -7,11 +7,11 @@ import os
 from typing import Union, Optional
 import pytz
 import exceptions
-import logging
+from loguru import logger
 
 import aliases
 
-logging.basicConfig(level=logging.INFO)
+
 dotenv.load_dotenv(dotenv.find_dotenv())
 SQL_SCHEMA = open("pg_schema.sql", mode="r")
 
@@ -59,10 +59,10 @@ def parse_payment_message(income_message: Message) -> Optional[tuple[int, str]]:
             category = str(_get_category_name_by_alias(parsed_message.group(2).lower()))  # return category name by key=alias
             return amount, category
         except ValueError as e:
-            logging.info(e)
+            logger.info(e)
             raise exceptions.IncorrectAmountFormatMessage
     else:
-        logging.error("Incorrect message. Need in fmt '{amount} {category}'")
+        logger.error("Incorrect message. Need in fmt '{amount} {category}'")
         raise exceptions.IncorrectMessageException
 
 
