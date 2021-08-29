@@ -1,5 +1,6 @@
 import datetime
 import sqlite3
+import dotenv
 import psycopg2
 from aiogram.types import Message
 import re
@@ -13,19 +14,9 @@ import aliases
 
 logging.basicConfig(level=logging.INFO)
 
-# con = sqlite3.connect(os.path.join("db", "finance.db"))
-# con.execute("PRAGMA foreign_keys = 1")  # enable FK support for sqlite engine. Need each time when you connecting to db
-# cur = con.cursor()
-
-
-connection = psycopg2.connect(
-    dbname=os.getenv("DB_NAME"),
-    user=os.getenv("DB_USER"),
-    password=os.getenv("DB_PASSWORD"),
-    sslmode='require',
-    host=os.getenv("DB_HOST"))
-
-connection.autocommit = True
+con = sqlite3.connect(os.path.join("db", "finance.db"))
+con.execute("PRAGMA foreign_keys = 1")  # enable FK support for sqlite engine. Need each time when you connecting to db
+cur = con.cursor()
 
 
 def _get_now_datetime() -> datetime.datetime:
@@ -68,18 +59,10 @@ def parse_payment_message(income_message: Message) -> Optional[tuple[int, str]]:
         raise exceptions.IncorrectMessageException
 
 
-# def _get_all_categories() -> list[tuple[str, str], ...]:
-#     """Get all categories from db"""
-#     cur.execute("SELECT id, name FROM Category")
-#     result = cur.fetchall()
-#     return result
-
-
 def _get_all_categories() -> list[tuple[str, str], ...]:
     """Get all categories from db"""
-    with connection.cursor() as cur:
-        cur.execute("SELECT id, name FROM Category")
-        result = cur.fetchall()
+    cur.execute("SELECT id, name FROM Category")
+    result = cur.fetchall()
     return result
 
 
@@ -95,47 +78,24 @@ def get_all_categories() -> str:
     return no_query_answer
 
 
-# def _get_category_id_by_name(category_name: str) -> int:
-#     """Return category id by name"""
-#     cur.execute(
-#         f"SELECT id FROM Category WHERE name='{category_name}'"
-#     )
-#     category_id = cur.fetchone()
-#     return int(category_id[0])
-
-
 def _get_category_id_by_name(category_name: str) -> int:
     """Return category id by name"""
-    with connection.cursor() as cur:
-        cur.execute(
-            f"SELECT id FROM Category WHERE name='{category_name}'"
-        )
-        category_id = cur.fetchone()
+    cur.execute(
+        f"SELECT id FROM Category WHERE name='{category_name}'"
+    )
+    category_id = cur.fetchone()
     return int(category_id[0])
-
-
-# def _get_month_payments_summary_for_categories() -> list[tuple[str, str, str], ...]:
-#     """Retrieve summary payments and count of transaction for categories for about month"""
-#     now = _get_now_datetime()
-#     month_ago = now - datetime.timedelta(days=30)
-#     cur.execute(f"SELECT Category.name, Sum(Payment.amount), Count(Payment.id)"
-#                 f" from Payment LEFT JOIN Category ON Payment.category = Category.id"
-#                 f" WHERE paid_at > '{month_ago}' GROUP BY Category.name "
-#                 )
-#     result = cur.fetchall()
-#     return result
 
 
 def _get_month_payments_summary_for_categories() -> list[tuple[str, str, str], ...]:
     """Retrieve summary payments and count of transaction for categories for about month"""
     now = _get_now_datetime()
     month_ago = now - datetime.timedelta(days=30)
-    with connection.cursor() as cur:
-        cur.execute(f"SELECT Category.name, Sum(Payment.amount), Count(Payment.id)" 
-                    f" from Payment LEFT JOIN Category ON Payment.category = Category.id"
-                    f" WHERE paid_at > '{month_ago}' GROUP BY Category.name "
-                    )
-        result = cur.fetchall()
+    cur.execute(f"SELECT Category.name, Sum(Payment.amount), Count(Payment.id)"
+                f" from Payment LEFT JOIN Category ON Payment.category = Category.id"
+                f" WHERE paid_at > '{month_ago}' GROUP BY Category.name "
+                )
+    result = cur.fetchall()
     return result
 
 
@@ -152,24 +112,12 @@ def get_payments_summary_for_categories_per_month() -> str:
     return "No data"
 
 
-# def _get_month_payments() -> Union[dict, None]:
-#     categories = _get_all_categories()
-#     result = dict()
-#     for category in categories:
-#         cur.execute("SELECT amount, paid_at FROM Payment WHERE category = ?", (category[0],))
-#         result[category[1]] = cur.fetchall()
-#     if result:
-#         return result
-#     return
-
-
 def _get_month_payments() -> Union[dict, None]:
     categories = _get_all_categories()
     result = dict()
-    with connection.cursor() as cur:
-        for category in categories:
-            cur.execute("SELECT amount, paid_at FROM Payment WHERE category = ?", (category[0],))
-            result[category[1]] = cur.fetchall()
+    for category in categories:
+        cur.execute("SELECT amount, paid_at FROM Payment WHERE category = ?", (category[0],))
+        result[category[1]] = cur.fetchall()
     if result:
         return result
     return
@@ -187,27 +135,6 @@ def get_month_payments() -> str:
     return "No data"
 
 
-# def add_payment(income_message: Message) -> None:
-#     """Add payment to db"""
-#     now = _get_now_datetime()
-#     try:
-#         amount, category_name = parse_payment_message(income_message)
-#     except (exceptions.IncorrectAmountFormatMessage, exceptions.IncorrectMessageException):
-#         raise
-#
-#     all_categories = get_all_categories()
-#
-#     if category_name not in all_categories:
-#         category_name = "other"
-#
-#     category_id = _get_category_id_by_name(category_name)
-#
-#     cur.execute(
-#         f"INSERT INTO Payment(category, amount, paid_at) VALUES ('{category_id}', '{amount}', '{now}')"
-#     )
-#     con.commit()
-
-
 def add_payment(income_message: Message) -> None:
     """Add payment to db"""
     now = _get_now_datetime()
@@ -222,23 +149,17 @@ def add_payment(income_message: Message) -> None:
         category_name = "other"
 
     category_id = _get_category_id_by_name(category_name)
-    with connection.cursor() as cur:
-        cur.execute(
-            f"INSERT INTO Payment(category, amount, paid_at) VALUES ('{category_id}', '{amount}', '{now}')"
-        )
 
-
-# def delete_last_payment() -> None:
-#     """Delete last added payment from db"""
-#     cur.execute(f"DELETE FROM Payment WHERE id = (SELECT MAX(id) FROM Payment)")
-#     con.commit()
+    cur.execute(
+        f"INSERT INTO Payment(category, amount, paid_at) VALUES ('{category_id}', '{amount}', '{now}')"
+    )
+    con.commit()
 
 
 def delete_last_payment() -> None:
     """Delete last added payment from db"""
-    with connection.cursor() as cur:
-        cur.execute(f"DELETE FROM Payment WHERE id = (SELECT MAX(id) FROM Payment)")
-
+    cur.execute(f"DELETE FROM Payment WHERE id = (SELECT MAX(id) FROM Payment)")
+    con.commit()
 
 
 def set_budget():
