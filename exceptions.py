@@ -4,3 +4,7 @@ class IncorrectMessageException(BaseException):
 
 class IncorrectAmountFormatMessage(ValueError):
     pass
+
+
+class DBAccessError(BaseException):
+    pass
