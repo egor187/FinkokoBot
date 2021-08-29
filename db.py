@@ -142,9 +142,6 @@ def add_payment(income_message: Message) -> None:
         raise
 
     all_categories = get_all_categories()
-    print(f"!!!!!!!{all_categories}")
-    print(f"!!!!!!!{category_name}")
-    print(f"!!!!!!!{category_name in all_categories}")
 
     if category_name not in all_categories:
         category_name = "other"
@@ -157,8 +154,10 @@ def add_payment(income_message: Message) -> None:
     con.commit()
 
 
-def del_last_payment():
-    pass
+def delete_last_payment() -> None:
+    """Delete last added payment from db"""
+    cur.execute(f"DELETE FROM Payment WHERE id = (SELECT MAX(id) FROM Payment)")
+    con.commit()
 
 
 def set_budget():
