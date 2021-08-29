@@ -1,4 +1,4 @@
-import logging
+from loguru import logger
 import os
 
 import dotenv
@@ -31,11 +31,22 @@ async def view_all_categories(message: types.Message):
     await message.answer(answer)
 
 
-@dispatcher.message_handler(commands=["payments"])
+@dispatcher.message_handler(commands=["month"])
 async def view_month_payments(message: types.Message):
     """Send message with all payments in last month"""
     result = db.get_payments_summary_for_categories_per_month()
     await message.answer(result)
+
+
+@dispatcher.message_handler(commands=["del"])
+async def delete_last_payment(message: types.Message):
+    try:
+        db.delete_last_payment()
+    except Exception as e:
+        logger.error(e)
+        await message.answer("Something wrong with dbaccess")
+    else:
+        await message.answer("Last payment deleted")
 
 
 @dispatcher.message_handler()
@@ -47,9 +58,6 @@ async def add_payment_view(message: types.Message):
         await message.answer("Incorrect message. Need in fmt '{amount} {category}'")
     else:
         await message.answer("Payment added")
-
-
-# TODO README.md
 
 
 if __name__ == "__main__":
