@@ -13,6 +13,7 @@ import aliases
 
 con = sqlite3.connect(os.path.join("db", "finance.db"))
 con.execute("PRAGMA foreign_keys = 1")  # enable FK support for sqlite engine. Need each time when you connecting to db
+con.commit()
 
 
 def _get_now_datetime() -> datetime.datetime:
@@ -57,9 +58,9 @@ def parse_payment_message(income_message: Message) -> Optional[tuple[int, str]]:
 
 def _get_all_categories() -> list[tuple[str, str], ...]:
     """Get all categories from db"""
-    with con.cursor() as cur:
-        cur.execute("SELECT id, name FROM Category")
-        result = cur.fetchall()
+    cur = con.cursor()
+    cur.execute("SELECT id, name FROM Category")
+    result = cur.fetchall()
     return result
 
 
@@ -77,11 +78,11 @@ def get_all_categories() -> str:
 
 def _get_category_id_by_name(category_name: str) -> int:
     """Return category id by name"""
-    with con.cursor() as cur:
-        cur.execute(
-            f"SELECT id FROM Category WHERE name='{category_name}'"
-        )
-        category_id = cur.fetchone()
+    cur = con.cursor()
+    cur.execute(
+        f"SELECT id FROM Category WHERE name='{category_name}'"
+    )
+    category_id = cur.fetchone()
     return int(category_id[0])
 
 
@@ -89,12 +90,12 @@ def _get_month_payments_summary_for_categories() -> list[tuple[str, str, str], .
     """Retrieve summary payments and count of transaction for categories for about month"""
     now = _get_now_datetime()
     month_ago = now - datetime.timedelta(days=30)
-    with con.cursor() as cur:
-        cur.execute(f"SELECT Category.name, Sum(Payment.amount), Count(Payment.id)"
-                    f" from Payment LEFT JOIN Category ON Payment.category = Category.id"
-                    f" WHERE paid_at > '{month_ago}' GROUP BY Category.name "
-                    )
-        result = cur.fetchall()
+    cur = con.cursor()
+    cur.execute(f"SELECT Category.name, Sum(Payment.amount), Count(Payment.id)"
+                f" from Payment LEFT JOIN Category ON Payment.category = Category.id"
+                f" WHERE paid_at > '{month_ago}' GROUP BY Category.name "
+                )
+    result = cur.fetchall()
     return result
 
 
@@ -114,10 +115,10 @@ def get_payments_summary_for_categories_per_month() -> str:
 def _get_month_payments() -> Union[dict, None]:
     categories = _get_all_categories()
     result = dict()
-    with con.cursor() as cur:
-        for category in categories:
-            cur.execute("SELECT amount, paid_at FROM Payment WHERE category = ?", (category[0],))
-            result[category[1]] = cur.fetchall()
+    cur = con.cursor()
+    for category in categories:
+        cur.execute("SELECT amount, paid_at FROM Payment WHERE category = ?", (category[0],))
+        result[category[1]] = cur.fetchall()
     if result:
         return result
     return
@@ -149,16 +150,16 @@ def add_payment(income_message: Message) -> None:
         category_name = "other"
 
     category_id = _get_category_id_by_name(category_name)
-    with con.cursor() as cur:
-        cur.execute(
-            f"INSERT INTO Payment(category, amount, paid_at) VALUES ('{category_id}', '{amount}', '{now}')"
-        )
+    cur = con.cursor()
+    cur.execute(
+        f"INSERT INTO Payment(category, amount, paid_at) VALUES ('{category_id}', '{amount}', '{now}')"
+    )
 
 
 def delete_last_payment() -> None:
     """Delete last added payment from db"""
-    with con.cursor() as cur:
-        cur.execute(f"DELETE FROM Payment WHERE id = (SELECT MAX(id) FROM Payment)")
+    cur = con.cursor()
+    cur.execute(f"DELETE FROM Payment WHERE id = (SELECT MAX(id) FROM Payment)")
 
 
 def set_budget():
@@ -203,9 +204,9 @@ def _init_db():
 
 def _check_db():
     """Check is db plugged in. If not init db and connect"""
-    with con.cursor() as cur:
-        cur.execute("SELECT * FROM sqlite_master")
-        result = cur.fetchall()
+    cur = con.cursor()
+    cur.execute("SELECT * FROM sqlite_master")
+    result = cur.fetchall()
     if result:
         return
     else:
