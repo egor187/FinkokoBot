@@ -19,11 +19,11 @@ SQL_SCHEMA = open("pg_schema.sql", mode="r")
 
 
 connection = psycopg2.connect(
-    dbname=os.getenv("DB_NAME"),
-    user=os.getenv("DB_USER"),
-    password=os.getenv("DB_PASSWORD"),
+    dbname=os.getenv("DB_NAME_PROD"),
+    user=os.getenv("DB_USER_PROD"),
+    password=os.getenv("DB_PASSWORD_PROD"),
     sslmode='require',
-    host=os.getenv("DB_HOST"))
+    host=os.getenv("DB_HOST_PROD"))
 
 connection.autocommit = True
 
