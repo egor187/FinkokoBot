@@ -218,7 +218,6 @@ def _check_db():
         try:
             cur.execute("SELECT * FROM Category")
             result = cur.fetchone()
-            print(f"!!!!{result}")
             return
         except Exception:
             _init_db(SQL_SCHEMA)
