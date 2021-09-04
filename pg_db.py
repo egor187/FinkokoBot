@@ -12,6 +12,8 @@ from loguru import logger
 import aliases
 
 
+OTHER_CATEGORY = "other"
+
 dotenv.load_dotenv(dotenv.find_dotenv())
 SQL_SCHEMA = open("pg_schema.sql", mode="r")
 
@@ -157,7 +159,7 @@ def add_payment(income_message: Message) -> None:
     all_categories = get_all_categories()
 
     if category_name not in all_categories:
-        category_name = "other"
+        category_name = OTHER_CATEGORY
 
     category_id = _get_category_id_by_name(category_name)
     with connection.cursor() as cur:
