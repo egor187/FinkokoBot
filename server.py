@@ -74,7 +74,7 @@ if __name__ == "__main__":
     # executor.start_polling(dispatcher, skip_updates=False)
     executor.start_webhook(
         dispatcher=dispatcher,
-        webhook_path="/finko-bot.herokuapp.com",
+        webhook_path="/finko-bot",
         on_startup=on_startup,
         on_shutdown=on_shutdown
     )
