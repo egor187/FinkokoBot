@@ -13,6 +13,8 @@ dotenv.load_dotenv(dotenv.find_dotenv())
 
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+# TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
+# TELEGRAM_BOT_TOKEN = "1925911247:AAGYdv5oPtfFzRxBzNLAfieMfD9cAM8RUqA"
 # HEROKU_WEBHOOK = os.getenv("HEROKU_WEBHOOK")
 
 # webhook settings
@@ -21,6 +23,7 @@ WEBHOOK_PATH = f'/webhook/{TELEGRAM_BOT_TOKEN}'
 WEBHOOK_URL = f'{WEBHOOK_HOST}{WEBHOOK_PATH}'
 WEBAPP_HOST = '0.0.0.0'  # or ip
 WEBAPP_PORT = int(os.getenv("PORT"))
+# WEBAPP_PORT = 5001
 
 
 bot = Bot(token=TELEGRAM_BOT_TOKEN)
@@ -28,7 +31,9 @@ dispatcher = Dispatcher(bot)
 
 
 async def on_startup(dispatcher: Dispatcher) -> None:
-    await bot.set_webhook(url=WEBHOOK_URL)
+    await bot.set_webhook(url="https://finko-bot.herokuapp.com/webhook/1925911247:AAGYdv5oPtfFzRxBzNLAfieMfD9cAM8RUqA")
+    # await bot.set_webhook(url=f"{WEBHOOK_HOST}{WEBHOOK_PATH}")
+    print(f"{await bot.get_webhook_info()}")
 
 
 async def on_shutdown(dispatcher):
@@ -83,7 +88,7 @@ if __name__ == "__main__":
         dispatcher=dispatcher,
         webhook_path=WEBHOOK_PATH,
         on_startup=on_startup,
-        # on_shutdown=on_shutdown,
+        on_shutdown=on_shutdown,
         skip_updates=True,
         host=WEBAPP_HOST,
         port=WEBAPP_PORT,
