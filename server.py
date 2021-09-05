@@ -13,10 +13,19 @@ dotenv.load_dotenv(dotenv.find_dotenv())
 
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+HEROKU_WEBHOOK = os.getenv("HEROKU_WEBHOOK")
 
 
 bot = Bot(token=TELEGRAM_BOT_TOKEN)
 dispatcher = Dispatcher(bot)
+
+
+async def on_startup(dp):
+    await bot.set_webhook(url=HEROKU_WEBHOOK)
+
+
+async def on_shutdown(dp):
+    await bot.delete_webhook()
 
 
 @dispatcher.message_handler(commands=["start"])
@@ -62,4 +71,10 @@ async def add_payment_view(message: types.Message):
 
 
 if __name__ == "__main__":
-    executor.start_polling(dispatcher, skip_updates=False)
+    # executor.start_polling(dispatcher, skip_updates=False)
+    executor.start_webhook(
+        dispatcher=dispatcher,
+        webhook_path="/finko-bot.herokuapp.com",
+        on_startup=on_startup,
+        on_shutdown=on_shutdown
+    )
