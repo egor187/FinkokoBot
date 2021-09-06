@@ -19,7 +19,7 @@ WEBHOOK_HOST = os.getenv("WEBHOOK_HOST")
 WEBHOOK_PATH = f'/webhook/{TELEGRAM_BOT_TOKEN}'
 WEBHOOK_URL = f'{WEBHOOK_HOST}{WEBHOOK_PATH}'
 WEBAPP_HOST = os.getenv("WEBAPP_HOST")
-WEBAPP_PORT = int(os.getenv("PORT"))
+WEBAPP_PORT = int(os.getenv("PORT", 5000))
 
 
 bot = Bot(token=TELEGRAM_BOT_TOKEN)
