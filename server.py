@@ -86,8 +86,8 @@ if __name__ == "__main__":
     # executor.start_polling(dispatcher, skip_updates=False)
     executor.start_webhook(
         dispatcher=dispatcher,
-        # webhook_path=WEBHOOK_PATH,
-        on_startup=on_startup,
+        webhook_path=WEBHOOK_PATH,
+        # on_startup=on_startup,
         # on_shutdown=on_shutdown,
         skip_updates=True,
         host=WEBAPP_HOST,
