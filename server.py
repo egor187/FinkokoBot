@@ -76,11 +76,17 @@ async def add_payment_view(message: types.Message):
         await message.answer("Payment added")
 
 
+@dispatcher.message_handler(commands=["show"])
+async def detail_handler(message: types.Message):
+    """Init dialog with summary details"""
+    pass
+
+
 if __name__ == "__main__":
     # executor.start_polling(dispatcher, skip_updates=False)
     executor.start_webhook(
         dispatcher=dispatcher,
-        webhook_path=WEBHOOK_PATH,
+        # webhook_path=WEBHOOK_PATH,
         on_startup=on_startup,
         # on_shutdown=on_shutdown,
         skip_updates=True,
