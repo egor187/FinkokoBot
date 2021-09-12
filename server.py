@@ -30,10 +30,6 @@ async def on_startup(dp: Dispatcher) -> None:
     await bot.set_webhook(url=f"{WEBHOOK_HOST}{WEBHOOK_PATH}")
 
 
-async def on_shutdown(dp: Dispatcher) -> None:
-    await bot.delete_webhook()
-
-
 @dispatcher.message_handler(commands=["start"])
 async def welcome(message: types.Message):
     """Send welcome message"""
@@ -51,7 +47,7 @@ async def view_all_categories(message: types.Message):
 async def view_month_payments(message: types.Message):
     """Send message with all payments in last month"""
     result = db.get_payments_summary_for_categories_per_month()
-    await message.answer(result)
+    await message.answer(result, parse_mode="HTML")
 
 
 @dispatcher.message_handler(commands=["del"])
@@ -88,7 +84,6 @@ if __name__ == "__main__":
         dispatcher=dispatcher,
         webhook_path=WEBHOOK_PATH,
         on_startup=on_startup,
-        # on_shutdown=on_shutdown,
         skip_updates=False,
         host=WEBAPP_HOST,
         port=WEBAPP_PORT,
