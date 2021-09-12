@@ -51,7 +51,7 @@ async def view_all_categories(message: types.Message):
 async def view_month_payments(message: types.Message):
     """Send message with all payments in last month"""
     result = db.get_payments_summary_for_categories_per_month()
-    await message.answer(result)
+    await message.answer(result, parse_mode="HTML")
 
 
 @dispatcher.message_handler(commands=["del"])

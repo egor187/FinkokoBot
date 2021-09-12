@@ -11,6 +11,8 @@ from loguru import logger
 
 import aliases
 
+from formatters import get_month_summary_html_format
+
 
 OTHER_CATEGORY = "other"
 
@@ -114,12 +116,8 @@ def _get_month_payments_summary_for_categories() -> list[tuple[str, str, str], .
 def get_payments_summary_for_categories_per_month() -> str:
     """Formatted summary payments about month"""
     payments_per_month = _get_month_payments_summary_for_categories()  # tuple (category name, total amount, n-trans)
-    answer = "Month payments:\n\n"
     if payments_per_month:
-        for payment_group in payments_per_month:
-            answer += f"'{payment_group[0]}': " \
-                      f"total '{payment_group[1]}'\n" \
-                      f"transaction count '{payment_group[2]}'\n"
+        answer = get_month_summary_html_format(payments_per_month)
         return answer
     return "No data"
 
