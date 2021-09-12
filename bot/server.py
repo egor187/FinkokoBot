@@ -6,8 +6,7 @@ import dotenv
 from aiogram import Bot, Dispatcher, executor, types
 
 # import db
-import pg_db as db
-import exceptions
+from bot import exceptions, pg_db as db
 
 dotenv.load_dotenv(dotenv.find_dotenv())
 

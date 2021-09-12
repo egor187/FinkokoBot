@@ -2,7 +2,7 @@
 notes.my
 
 # Sqlite databases
-db/
+bot/db/
 *.db
 
 # Certificates
