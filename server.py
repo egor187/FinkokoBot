@@ -30,10 +30,6 @@ async def on_startup(dp: Dispatcher) -> None:
     await bot.set_webhook(url=f"{WEBHOOK_HOST}{WEBHOOK_PATH}")
 
 
-async def on_shutdown(dp: Dispatcher) -> None:
-    await bot.delete_webhook()
-
-
 @dispatcher.message_handler(commands=["start"])
 async def welcome(message: types.Message):
     """Send welcome message"""
@@ -88,7 +84,6 @@ if __name__ == "__main__":
         dispatcher=dispatcher,
         webhook_path=WEBHOOK_PATH,
         on_startup=on_startup,
-        # on_shutdown=on_shutdown,
         skip_updates=False,
         host=WEBAPP_HOST,
         port=WEBAPP_PORT,
