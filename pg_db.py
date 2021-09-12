@@ -127,8 +127,10 @@ def _get_month_payments() -> Union[dict, None]:
     result = dict()
     with connection.cursor() as cur:
         for category in categories:
-            cur.execute("SELECT amount, paid_at FROM Payment WHERE category = ?", (category[0],))
-            result[category[1]] = cur.fetchall()
+            cur.execute(f"SELECT amount, paid_at FROM Payment WHERE category = {category[0]}")
+            query_result = cur.fetchall()
+            if len(query_result) > 0:
+                result[category[1]] = query_result
     if result:
         return result
     return
