@@ -3,6 +3,7 @@ aliases = {
 
     "коммуналка": "communal",
     "КП": "communal",
+    "фильтры для воды": "communal",
 
     "кино": "entertainment",
     "парк": "entertainment",
@@ -28,6 +29,7 @@ aliases = {
 
     "СТО": "car",
     "ТО": "car",
+    "авто": "car",
 
     "mcdak": "cafe",
     "fastfood": "cafe",
