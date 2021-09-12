@@ -9,7 +9,7 @@ import pytz
 import exceptions
 from loguru import logger
 
-from bot import aliases
+import aliases
 
 from formatters import get_month_summary_html_format, get_payments_details_per_month_html_format
 
@@ -17,7 +17,7 @@ from formatters import get_month_summary_html_format, get_payments_details_per_m
 OTHER_CATEGORY = "other"
 
 dotenv.load_dotenv(dotenv.find_dotenv())
-SQL_SCHEMA = open("/pg_schema.sql", mode="r")
+SQL_SCHEMA = open("bot/pg_schema.sql", mode="r")
 
 
 connection = psycopg2.connect(
