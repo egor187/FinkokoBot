@@ -11,7 +11,7 @@ from loguru import logger
 
 import aliases
 
-from formatters import get_month_summary_html_format
+from formatters import get_month_summary_html_format, get_payments_details_per_month_html_format
 
 
 OTHER_CATEGORY = "other"
@@ -137,11 +137,7 @@ def _get_month_payments() -> Union[dict, None]:
 def get_month_payments() -> str:
     payments = _get_month_payments().items()
     if payments:
-        answer = ""
-        for category, payments_tuple in payments:
-            answer += f"For {category} payments is: "
-            for payment in payments_tuple:
-                answer += f"{payment[0]} at: {payment[1]} \n"
+        answer = get_payments_details_per_month_html_format(payments)
         return answer
     return "No data"
 
