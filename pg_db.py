@@ -172,6 +172,18 @@ def delete_last_payment() -> None:
         cur.execute(f"DELETE FROM Payment WHERE id = (SELECT MAX(id) FROM Payment)")
 
 
+def parse_detail_message(income_message: Message):
+    pass
+
+
+def get_category_summary(income_message: Message) -> None:
+    """Get summary payments for category"""
+    try:
+        amount, category_name = parse_detail_message(income_message)
+    except (exceptions.IncorrectAmountFormatMessage, exceptions.IncorrectMessageException):
+        raise
+
+
 def set_budget():
     pass
 
