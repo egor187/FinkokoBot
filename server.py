@@ -50,6 +50,13 @@ async def view_month_payments(message: types.Message):
     await message.answer(result, parse_mode="HTML")
 
 
+@dispatcher.message_handler(commands=["month_detail"])
+async def view_month_payments(message: types.Message):
+    """Send message with all payments in last month"""
+    result = db.get_month_payments()
+    await message.answer(result, parse_mode="HTML")
+
+
 @dispatcher.message_handler(commands=["del"])
 async def delete_last_payment(message: types.Message):
     try:
