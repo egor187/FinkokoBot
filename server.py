@@ -13,18 +13,24 @@ dotenv.load_dotenv(dotenv.find_dotenv())
 
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-HEROKU_WEBHOOK = os.getenv("HEROKU_WEBHOOK")
+
+# webhook settings
+WEBHOOK_HOST = os.getenv("WEBHOOK_HOST")
+WEBHOOK_PATH = f'/webhook/{TELEGRAM_BOT_TOKEN}'
+WEBHOOK_URL = f'{WEBHOOK_HOST}{WEBHOOK_PATH}'
+WEBAPP_HOST = os.getenv("WEBAPP_HOST")
+WEBAPP_PORT = int(os.getenv("PORT", 5000))
 
 
 bot = Bot(token=TELEGRAM_BOT_TOKEN)
 dispatcher = Dispatcher(bot)
 
 
-async def on_startup(dp):
-    await bot.set_webhook(url=HEROKU_WEBHOOK)
+async def on_startup(dp: Dispatcher) -> None:
+    await bot.set_webhook(url=f"{WEBHOOK_HOST}{WEBHOOK_PATH}")
 
 
-async def on_shutdown(dp):
+async def on_shutdown(dp: Dispatcher) -> None:
     await bot.delete_webhook()
 
 
@@ -70,11 +76,20 @@ async def add_payment_view(message: types.Message):
         await message.answer("Payment added")
 
 
+@dispatcher.message_handler(commands=["show"])
+async def detail_handler(message: types.Message):
+    """Init dialog with summary details"""
+    pass
+
+
 if __name__ == "__main__":
     # executor.start_polling(dispatcher, skip_updates=False)
     executor.start_webhook(
         dispatcher=dispatcher,
-        webhook_path="/finko-bot.herokuapp.com",
+        webhook_path=WEBHOOK_PATH,
         on_startup=on_startup,
-        on_shutdown=on_shutdown
+        # on_shutdown=on_shutdown,
+        skip_updates=False,
+        host=WEBAPP_HOST,
+        port=WEBAPP_PORT,
     )
