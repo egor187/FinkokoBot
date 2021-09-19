@@ -101,9 +101,11 @@ async def process_budget_limit(message: types.Message, state: FSMContext):
 @dispatcher.message_handler(commands=["show_limit"])
 async def get_budget_balance(message: types.Message):
     try:
-        db.add_payment(message)
-    except (exceptions.IncorrectAmountFormatMessage, exceptions.IncorrectMessageException):
-        await message.answer("Incorrect message. Need in fmt '{amount} {category}'")
+        balance = db.get_balance()
+    except exceptions.BudgetNotSetException:
+        await message.answer("Budget not set yet")
+    except exceptions.DBAccessException:
+        await message.answer("Something wrong with db connection")
     else:
         await message.answer("Payment added")
 
