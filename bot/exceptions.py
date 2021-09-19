@@ -2,9 +2,17 @@ class IncorrectMessageException(BaseException):
     pass
 
 
-class IncorrectAmountFormatMessage(ValueError):
+class IncorrectAmountFormatMessageException(ValueError):
     pass
 
 
-class DBAccessError(BaseException):
+class DBAccessException(BaseException):
+    pass
+
+
+class BudgetNotSetException(BaseException):
+    pass
+
+
+class BudgetLimitReachedException(BaseException):
     pass
