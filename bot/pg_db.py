@@ -205,7 +205,8 @@ def set_budget(month_limit: str) -> None:
         raise
     with connection.cursor() as cur:
         cur.execute(
-            f"INSERT INTO Budget(month_limit, created_at, expired_at, balance) VALUES ('{month_limit}', '{created_at}', '{expired_at}', '{month_limit}')"
+            f"INSERT INTO Budget(month_limit, created_at, expired_at, balance)"
+            f" VALUES ('{month_limit}', '{created_at}', '{expired_at}', '{month_limit}')"
         )
 
 
