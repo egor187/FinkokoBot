@@ -194,8 +194,19 @@ def get_category_summary(income_message: Message) -> None:
         raise
 
 
-def set_budget():
-    pass
+def set_budget(month_limit: str) -> None:
+    """Set month budget"""
+    created_at = _get_now_datetime()
+    expired_at = created_at + datetime.timedelta(days=30)
+
+    try:
+        month_limit = int(month_limit)
+    except ValueError:
+        raise
+    with connection.cursor() as cur:
+        cur.execute(
+            f"INSERT INTO Budget(month_limit, created_at, expired_at, balance) VALUES ('{month_limit}', '{created_at}', '{expired_at}', '{month_limit}')"
+        )
 
 
 def update_budget():
