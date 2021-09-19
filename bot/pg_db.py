@@ -213,6 +213,57 @@ def update_budget():
     pass
 
 
+def _get_last_active_budget():
+    """Возвращает поля последнего действующего бюджета """
+    with connection.cursor() as cur:
+        cur.execute(
+            f"SELECT * FROM Budget "
+            f"WHERE CURRENT_TIMESTAMP BETWEEN created_at AND expired_at "
+            f"ORDER BY created_at DESC LIMIT 1"
+        )
+        budget = cur.fetchone()
+    if budget:
+        result = {
+            "id": budget[0],
+            "month_limit": budget[1],
+            "created_at": budget[2],
+            "expired_at": budget[3],
+            "balance": budget[4]
+        }
+        return result
+    return None
+
+
+# deprecated realization with calculation result at time
+# def get_balance():
+#     try:
+#         with connection.cursor() as cur:
+#             cur.execute("select b.month_limit - Sum(amount) from Payment as p, Budget as b where "
+#                         "p.paid_at between (select created_at from Budget ORDER BY created_at DESC LIMIT 1) "
+#                         "AND (select expired_at from Budget ORDER BY expired_at DESC LIMIT 1) GROUP BY b.id;")
+#             balance = cur.fetchone()[0]
+#     except TypeError:
+#         raise exceptions.BudgetNotSetException
+#     except Exception:
+#         raise exceptions.DBAccessException
+#     else:
+#         return balance
+
+def get_balance():
+    try:
+        with connection.cursor() as cur:
+            cur.execute("SELECT balance FROM Budget "
+                        "WHERE CURRENT_TIMESTAMP BETWEEN created_at AND expired_at "
+                        "ORDER BY created_at DESC LIMIT 1")
+            balance = cur.fetchone()[0]
+    except TypeError:
+        raise exceptions.BudgetNotSetException
+    except Exception:
+        raise exceptions.DBAccessException
+    else:
+        return balance
+
+
 def del_budget():
     pass
 
