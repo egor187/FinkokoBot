@@ -158,10 +158,22 @@ def add_payment(income_message: Message) -> None:
         category_name = OTHER_CATEGORY
 
     category_id = _get_category_id_by_name(category_name)
+
+    budget = _get_last_active_budget()
+
     with connection.cursor() as cur:
         cur.execute(
             f"INSERT INTO Payment(category, amount, paid_at) VALUES ('{category_id}', '{amount}', '{now}')"
         )
+
+    with connection.cursor() as cur:
+        if budget:
+            cur.execute(
+                f"UPDATE Budget SET balance = balance - {amount} WHERE id = {budget.get('id')}"
+            )
+
+    if budget.get("balance") < amount:
+        raise exceptions.BudgetLimitReachedException
 
 
 def delete_last_payment() -> None:
