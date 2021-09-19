@@ -7,7 +7,10 @@ create table Category(
 
 create table Budget(
     id BIGINT PRIMARY KEY generated always as identity,
-    month_limit integer
+    month_limit integer NOT NULL,
+    balance = integer,
+    created_at timestamp NOT NULL,
+    expired_at timestamp NOT NULL
 );
 
 create table Payment(
