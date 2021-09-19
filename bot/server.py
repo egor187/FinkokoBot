@@ -107,6 +107,20 @@ async def get_budget_balance(message: types.Message):
     except exceptions.DBAccessException:
         await message.answer("Something wrong with db connection")
     else:
+        await message.answer(f"Balance is {balance}")
+
+
+@dispatcher.message_handler()
+async def add_payment_view(message: types.Message):
+    """Entrypoint to 'add_payment' process"""
+
+    try:
+        db.add_payment(message)
+    except (exceptions.IncorrectAmountFormatMessageException, exceptions.IncorrectMessageException):
+        await message.answer("Incorrect message. Need in fmt '{amount} {category}'")
+    except exceptions.BudgetLimitReachedException:
+        await message.answer("Budget limit for month is reached")
+    else:
         await message.answer("Payment added")
 
 
