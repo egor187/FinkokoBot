@@ -149,7 +149,7 @@ def add_payment(income_message: Message) -> None:
     now = _get_now_datetime()
     try:
         amount, category_name = parse_payment_message(income_message)
-    except (exceptions.IncorrectAmountFormatMessage, exceptions.IncorrectMessageException):
+    except (exceptions.IncorrectAmountFormatMessageException, exceptions.IncorrectMessageException):
         raise
 
     all_categories = get_all_categories()
@@ -178,7 +178,7 @@ def get_category_summary(income_message: Message) -> None:
     """Get summary payments for category"""
     try:
         amount, category_name = parse_detail_message(income_message)
-    except (exceptions.IncorrectAmountFormatMessage, exceptions.IncorrectMessageException):
+    except (exceptions.IncorrectAmountFormatMessageException, exceptions.IncorrectMessageException):
         raise
 
 
