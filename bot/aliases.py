@@ -4,6 +4,7 @@ aliases = {
     "коммуналка": "communal",
     "КП": "communal",
     "фильтры для воды": "communal",
+    "газ": "communal",
 
     "кино": "entertainment",
     "парк": "entertainment",
@@ -15,6 +16,7 @@ aliases = {
     "опера": "entertainment",
     "балет": "entertainment",
     "планетарий": "entertainment",
+    "развлечения": "entertainment",
 
 
     "такси": "transport",
@@ -44,4 +46,18 @@ aliases = {
     "телефон": "communication",
 
     "отпуск": "vacation",
+
+    "больница": "medicine",
+    "врач": "medicine",
+    "доктор": "medicine",
+    "аптека": "medicine",
+    "лекарства": "medicine",
+    "анализы": "medicine",
+    "таблетки": "medicine",
+
+    "одежда": "clothes",
+    "вещи": "clothes",
+
+    "подарки": "gifts",
+    "подарок": "gifts",
 }
