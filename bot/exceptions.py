@@ -1,4 +1,4 @@
-class IncorrectMessageException(BaseException):
+class IncorrectMessageException(Exception):
     pass
 
 
@@ -6,13 +6,21 @@ class IncorrectAmountFormatMessageException(ValueError):
     pass
 
 
-class DBAccessException(BaseException):
+class IncorrectAddCategoryFormatMessageException(ValueError):
     pass
 
 
-class BudgetNotSetException(BaseException):
+class DBAccessException(Exception):
     pass
 
 
-class BudgetLimitReachedException(BaseException):
+class BudgetNotSetException(Exception):
+    pass
+
+
+class BudgetLimitReachedException(Exception):
+    pass
+
+
+class CategoryAlreadyExistsException(Exception):
     pass
