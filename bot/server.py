@@ -34,6 +34,10 @@ class BudgetState(StatesGroup):
     month_limit = State()
 
 
+class AddCategoryState(StatesGroup):
+    category = State()
+
+
 async def on_startup(dp: Dispatcher) -> None:
     await bot.set_webhook(url=f"{WEBHOOK_HOST}{WEBHOOK_PATH}")
 
@@ -82,6 +86,12 @@ async def set_month_budget(message: types.Message):
     await message.answer("What is the limit of budget")
 
 
+@dispatcher.message_handler(commands=["add_category"])
+async def add_category_view(message: types.Message):
+    await AddCategoryState.category.set()
+    await message.answer("Provide category name with aliases in format like 'category_name: <alias>,<alias>,...' ")
+
+
 @dispatcher.message_handler(state=BudgetState.month_limit)
 async def process_budget_limit(message: types.Message, state: FSMContext):
 
@@ -96,6 +106,24 @@ async def process_budget_limit(message: types.Message, state: FSMContext):
         await message.answer("Incorrect message format. Budget amount must be an integer")
     else:
         await message.answer("Budget set")
+
+
+@dispatcher.message_handler(state=AddCategoryState.category)
+async def process_add_category(message: types.Message, state: FSMContext):
+
+    async with state.proxy() as data:
+        data["category"] = message.text
+
+    await state.finish()
+
+    try:
+        db.add_category(data.get("category"))
+    except ValueError:
+        await message.answer("Incorrect message format")
+    except exceptions.CategoryAlreadyExistsException:
+        await message.answer("Category already registered")
+    else:
+        await message.answer("Category added")
 
 
 @dispatcher.message_handler(commands=["show_limit"])
