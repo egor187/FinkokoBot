@@ -21,10 +21,20 @@ create table Payment(
     FOREIGN KEY(category) REFERENCES Category (id) ON DELETE RESTRICT
 );
 
+create table Aliases(
+    id BIGINT PRIMARY KEY generated always as identity,
+    category integer,
+    alias varchar(120) UNIQUE,
+    FOREIGN KEY(category) REFERENCES Category (id) ON DELETE RESTRICT
+);
+
 insert into Category (name, is_base) values
     ('products', true),
     ('cafe', true),
     ('communal', true),
+    ('medicine', true),
+    ('gifts', true),
+    ('clothes', true),
     ('entertainment', false),
     ('transport', false),
     ('gasoline', false),
