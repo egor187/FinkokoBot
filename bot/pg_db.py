@@ -32,17 +32,12 @@ connection.autocommit = True
 
 def _get_now_datetime() -> datetime.datetime:
     """Return now datetime object"""
-    tz = pytz.timezone("Europe/Moscow")
-    now = datetime.datetime.now(tz)
-    return now
+    return datetime.datetime.now(pytz.timezone("Europe/Moscow"))
 
 
 def get_now_datetime_formatted() -> str:
     """Return now datetime formatted object"""
-    now = _get_now_datetime()
-    fmt = "%Y-%m-%d %H:%M:%S"
-    now_formatted = now.strftime(fmt)
-    return now_formatted
+    return _get_now_datetime().strftime("%Y-%m-%d %H:%M:%S")
 
 
 def _get_category_name_by_alias(category_alias: str) -> str:
@@ -100,8 +95,7 @@ def _get_all_categories() -> list[tuple[str, str], ...]:
     """Get all categories from db"""
     with connection.cursor() as cur:
         cur.execute("SELECT id, name FROM Category")
-        result = cur.fetchall()
-    return result
+        return cur.fetchall()
 
 
 def get_all_categories() -> str:
@@ -120,8 +114,7 @@ def _get_category_name_by_id(category_id: str) -> str:
     """Return category name by id"""
     with connection.cursor() as cur:
         cur.execute(f"SELECT name FROM Category WHERE id = '{category_id}'")
-        category_name = cur.fetchone()[0]
-    return category_name
+        return cur.fetchone()[0]
 
 
 def _get_category_id_by_name(category_name: str) -> int:
@@ -143,16 +136,14 @@ def _get_month_payments_summary_for_categories() -> list[tuple[str, str, str], .
                     f" from Payment LEFT JOIN Category ON Payment.category = Category.id"
                     f" WHERE paid_at > '{month_ago}' GROUP BY Category.name "
                     )
-        result = cur.fetchall()
-    return result
+        return cur.fetchall()
 
 
 def get_payments_summary_for_categories_per_month() -> str:
     """Formatted summary payments about month"""
     payments_per_month = _get_month_payments_summary_for_categories()  # tuple (category name, total amount, n-trans)
     if payments_per_month:
-        answer = get_month_summary_html_format(payments_per_month)
-        return answer
+        return get_month_summary_html_format(payments_per_month)
     return "No data"
 
 
@@ -165,16 +156,13 @@ def _get_month_payments() -> Union[dict, None]:
             query_result = cur.fetchall()
             if len(query_result) > 0:
                 result[category[1]] = query_result
-    if result:
-        return result
-    return
+    return result if result else None
 
 
 def get_month_payments() -> str:
     payments = _get_month_payments().items()
     if payments:
-        answer = get_payments_details_per_month_html_format(payments)
-        return answer
+        return get_payments_details_per_month_html_format(payments)
     return "No data"
 
 
@@ -241,6 +229,7 @@ def parse_detail_message(income_message: Message):
 
 def get_category_summary(income_message: Message) -> None:
     """Get summary payments for category"""
+    # TODO finish it!
     try:
         amount, category_name = parse_detail_message(income_message)
     except (exceptions.IncorrectAmountFormatMessageException, exceptions.IncorrectMessageException):
@@ -277,31 +266,14 @@ def _get_last_active_budget():
         )
         budget = cur.fetchone()
     if budget:
-        result = {
+        return {
             "id": budget[0],
             "month_limit": budget[1],
             "created_at": budget[2],
             "expired_at": budget[3],
             "balance": budget[4]
         }
-        return result
-    return None
 
-
-# deprecated realization with calculation result at time
-# def get_balance():
-#     try:
-#         with connection.cursor() as cur:
-#             cur.execute("select b.month_limit - Sum(amount) from Payment as p, Budget as b where "
-#                         "p.paid_at between (select created_at from Budget ORDER BY created_at DESC LIMIT 1) "
-#                         "AND (select expired_at from Budget ORDER BY expired_at DESC LIMIT 1) GROUP BY b.id;")
-#             balance = cur.fetchone()[0]
-#     except TypeError:
-#         raise exceptions.BudgetNotSetException
-#     except Exception:
-#         raise exceptions.DBAccessException
-#     else:
-#         return balance
 
 def get_balance():
     try:
