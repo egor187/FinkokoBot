@@ -8,7 +8,7 @@ import pytz
 import exceptions
 from loguru import logger
 
-from bot import aliases
+from bot.aliases import aliases
 
 OTHER_CATEGORY = "other"
 
@@ -20,23 +20,18 @@ con.commit()
 
 def _get_now_datetime() -> datetime.datetime:
     """Return now datetime object"""
-    tz = pytz.timezone("Europe/Moscow")
-    now = datetime.datetime.now(tz)
-    return now
+    return datetime.datetime.now(pytz.timezone("Europe/Moscow"))
 
 
 def get_now_datetime_formatted() -> str:
     """Return now datetime formatted object"""
-    now = _get_now_datetime()
-    fmt = "%Y-%m-%d %H:%M:%S"
-    now_formatted = now.strftime(fmt)
-    return now_formatted
+    return _get_now_datetime().strftime("%Y-%m-%d %H:%M:%S")
 
 
 def _get_category_name_by_alias(category_alias: str) -> str:
     """Return category name for passed category alias"""
-    if category_alias not in aliases.aliases.values():
-        category_name = aliases.aliases.get(category_alias)
+    if category_alias not in aliases.values():
+        category_name = aliases.get(category_alias)
     else:
         category_name = category_alias
     return category_name
@@ -52,7 +47,7 @@ def parse_payment_message(income_message: Message) -> Optional[tuple[int, str]]:
             return amount, category
         except ValueError as e:
             logger.error(e)
-            raise exceptions.IncorrectAmountFormatMessage
+            raise exceptions.IncorrectAmountFormatMessageException
     else:
         logger.info("Incorrect message. Need in fmt '{amount} {category}'")
         raise exceptions.IncorrectMessageException
@@ -62,20 +57,18 @@ def _get_all_categories() -> list[tuple[str, str], ...]:
     """Get all categories from db"""
     cur = con.cursor()
     cur.execute("SELECT id, name FROM Category")
-    result = cur.fetchall()
-    return result
+    return cur.fetchall()
 
 
 def get_all_categories() -> str:
     """Get all categories from db in formatted output"""
     categories = _get_all_categories()
-    no_query_answer = "You haven't registered any categories yet"
     if categories:
         answer = ""
         for category in categories:
             answer += category[1] + "\n"
         return answer
-    return no_query_answer
+    return "You haven't registered any categories yet"
 
 
 def _get_category_id_by_name(category_name: str) -> int:
@@ -97,8 +90,7 @@ def _get_month_payments_summary_for_categories() -> list[tuple[str, str, str], .
                 f" from Payment LEFT JOIN Category ON Payment.category = Category.id"
                 f" WHERE paid_at > '{month_ago}' GROUP BY Category.name "
                 )
-    result = cur.fetchall()
-    return result
+    return cur.fetchall()
 
 
 def get_payments_summary_for_categories_per_month() -> str:
@@ -143,7 +135,7 @@ def add_payment(income_message: Message) -> None:
     now = _get_now_datetime()
     try:
         amount, category_name = parse_payment_message(income_message)
-    except (exceptions.IncorrectAmountFormatMessage, exceptions.IncorrectMessageException):
+    except (exceptions.IncorrectAmountFormatMessageException, exceptions.IncorrectMessageException):
         raise
 
     all_categories = get_all_categories()
@@ -208,8 +200,7 @@ def _check_db():
     """Check is db plugged in. If not init db and connect"""
     cur = con.cursor()
     cur.execute("SELECT * FROM sqlite_master")
-    result = cur.fetchall()
-    if result:
+    if cur.fetchall():
         return
     else:
         _init_db()
